@@ -51,12 +51,8 @@ async function setupPlugin(
 
   const loader = await workspace.createLoader();
 
-  let disposed = false;
   ctx.onDispose(() => {
-    if (!disposed) {
-      loader[Symbol.dispose]?.();
-      disposed = true;
-    }
+    loader[Symbol.dispose]?.();
   });
 
   return loader;
