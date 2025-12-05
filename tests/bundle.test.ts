@@ -3,7 +3,6 @@ import {
   build,
   type BuildOptions,
   type OnLoadArgs,
-  OnResolveArgs,
   type Plugin,
 } from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
