@@ -28,5 +28,5 @@
   "publish": {
     "exclude": [".github/", "tests/"]
   },
-  "exclude": ["./tests/fixtures/virtual.ts"]
+  "exclude": ["./tests/fixtures/virtual.ts", "./tests/fixtures/compiled.ts"]
 }
