@@ -234,6 +234,56 @@ Deno.test({
   sanitizeOps: false,
 });
 
+Deno.test({
+  name:
+    "plugins can participate in resolution and loading after denoPlugin if using unique namespace",
+  fn: async () => {
+    const res = await testEsbuild({
+      entryPoints: ["@fixtures/mapped2"],
+      plugins: [
+        {
+          name: "multiply",
+          setup(ctx) {
+            ctx.onResolve(
+              { filter: /mapped2$/ },
+              () => {
+                return {
+                  path: getFixture("simple.ts"),
+                  namespace: "test-internal",
+                };
+              },
+            );
+
+            ctx.onLoad(
+              { filter: /.*/, namespace: "test-internal" },
+              async (args: OnLoadArgs) => {
+                const url = path.toFileUrl(args.path);
+                const file = await Deno.readTextFile(url);
+                return {
+                  contents: file + "\nexport const z: number = 3;\n",
+                  loader: "ts",
+                };
+              },
+            );
+          },
+        },
+      ],
+    });
+
+    expect(res.errors).toEqual([]);
+    expect(res.warnings).toEqual([]);
+    expect(res.outputFiles.length).toEqual(1);
+
+    const output = res.outputFiles[0].text;
+    expect(output).toContain('console.log("hey")');
+    const dataURL = `data:application/javascript;base64,${btoa(output)}`;
+    const { z } = await import(dataURL);
+    expect(z).toBe(3);
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
+
 const cssPlugin: Plugin = {
   name: "css",
   setup(ctx) {
